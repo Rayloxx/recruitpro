@@ -1,26 +1,32 @@
-# Use the official PHP image with Apache
+# Use PHP 8.2 with Apache
 FROM php:8.2-apache
 
-# Install system dependencies and PHP extensions
+# Install required system packages and PHP extensions
 RUN apt-get update && apt-get install -y \
-    git unzip libzip-dev && \
-    docker-php-ext-install pdo pdo_mysql zip && \
-    a2enmod rewrite
+    git \
+    unzip \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql zip gd bcmath exif \
+    && a2enmod rewrite
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /var/www/html
 
-# Copy only the PHP app files (from jobs folder)
+# Copy application files
 COPY jobs/ ./
 
-# Install Composer globally
+# Copy Composer from official image
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Expose the port Apache runs on
+# Expose Apache port
 EXPOSE 80
 
-# Start Apache
+# Start Apache server
 CMD ["apache2-foreground"]
