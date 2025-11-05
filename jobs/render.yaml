@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: recruitpro
+    env: docker
+    plan: free
+    region: singapore
+    branch: main
